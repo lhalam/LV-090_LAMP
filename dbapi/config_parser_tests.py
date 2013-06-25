@@ -20,6 +20,15 @@ class TestConfigParsing(unittest.TestCase):
         self.assertEquals(mysql_section_data['password'], 'root')
         self.assertEquals(mysql_section_data['port'], '3306')
 
+    def test_logging_section_parameters(self):
+        parameters = ('level', 'logfile')
+        for parameter in get_section_settings(self.config_file, 'Logging'):
+            self.assertIn(parameter, parameters)
+
+    def test_logging_section_parameters_values(self):
+        logging_data = get_section_settings(self.config_file, 'Logging')
+        self.assertEquals(logging_data['level'], 'debug')
+        self.assertEquals(logging_data['logfile'], 'dbapi.log')
 
 if __name__ == '__main__':
     unittest.main()
