@@ -8,7 +8,7 @@ class TestConfigParsing(unittest.TestCase):
         self.config_file = 'test_config.cfg'
         self.section = "MySQL settings"
 
-    def test_section_parameters(self):
+    def test_mysql_section_parameters(self):
         parameters = ('host', 'user', 'password', 'database_name', 'port')
         for parameter in get_section_settings(self.config_file, self.section):
             self.assertIn(parameter, parameters)
