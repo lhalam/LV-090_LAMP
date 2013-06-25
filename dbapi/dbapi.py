@@ -9,7 +9,7 @@ from netaddr import IPAddress
 
 from logger import create_logger
 
-MODULE_LOGGER = create_logger('dbapi', 'dbapi.log')
+MODULE_LOGGER = create_logger('dbapi', 'test_config.cfg')
 
 
 def get_ip_data(ip_address):
