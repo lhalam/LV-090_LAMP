@@ -6,7 +6,7 @@ import MySQLdb as mdb
 from config_parser import get_section_settings
 from logger import create_logger
 
-MODULE_LOGGER = create_logger('mysql_connector', 'dbapi.log')
+MODULE_LOGGER = create_logger('mysql_connector', 'test_config.cfg')
 
 def get_database_connection(config, section):
     """Return database connection object.
