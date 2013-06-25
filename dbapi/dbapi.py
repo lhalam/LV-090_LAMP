@@ -245,3 +245,124 @@ def check_if_ip_in_database(connection, ip_address):
         % (ip_address, result)
     )
     return result
+
+
+'''delete function'''
+
+def findID(connection, ip_address):
+    '''Define the IP id
+    :param connect: object connection to the database
+    :type connect: object
+    :param ip: ip address
+    :type ip: str
+    '''
+    ipv = IPAddress(ip_address).version
+    #ipv = ipv.version
+    sql = "select id from ipv%s_addresses where address = %s"%(ipv,ip_address)
+    cursor = connection.cursor()
+    try:
+        # Execute the SQL command
+        cursor.execute(sql)
+        #Selects all data from a table
+        ipid = cursor.fetchone()
+        return ipid[0]
+        # Commit your changes in the database
+        connection.autocommit(True)
+    except MySQLdb.Error:
+        logging.error('Failed to find IP id')
+
+def delIpFromList(connection, ip_address, lists):
+    '''Removes the IP from black or white list
+    :param connect: object connection to the database
+    :type connect: object
+    :param ip: ip address
+    :type ip: str
+    :param lists: black or white list
+    :type lists: string (blacklist or whitelist)
+    :raises: AttributeError, TypeError 
+    '''
+    ipid = findID(connection, ip_address)
+    #Version detection
+    ipv = IPAddress(ip_address).version
+    sql = "DELETE FROM %s WHERE v%s_id_%s = %s"%(lists,ipv,lists,ipid)
+    cursor = connection.cursor()
+    try:
+        #Execute the SQL command
+        cursor.execute(sql)
+        #Commit your changes in the database
+        connection.autocommit(True)
+    except MySQLdb.Error:
+        # Rollback in case there is any error
+        connection.rollback()
+        logging.error('Failed to remove IP from the lists')
+
+def deleteIp(connection, ip_address):
+    '''Removes the IP from database
+    :param connect: object connection to the database
+    :type connect: object
+    :param ip: ip address
+    :type ip: ip
+    '''
+    #Version detection
+    ipv = IPAddress(ip_address).version
+    ipid = findID(connection, ip_address)
+    sql = "DELETE FROM `ipv%s_addresses` WHERE `address` = %s"%(ipv,ip_address)
+    sql1 = "DELETE FROM `blacklist` WHERE `v%s_id_blacklist` = %s"%(ipv,ipid)
+    sql2 = "DELETE FROM `whitelist` WHERE `v%s_id_whitelist` = %s"%(ipv,ipid)
+    sql3 = "DELETE FROM `source_to_addresses` WHERE `v%s_id` = %s"%(ipv,ipid)
+    try:
+        #Execute the SQL command
+        cursor = connection.cursor()
+        cursor.execute(sql3)
+        cursor.execute(sql1)
+        cursor.execute(sql2)
+        cursor.execute(sql)
+        #Commit your changes in the database
+        connection.autocommit(True)
+    except MySQLdb.Error:
+        # Rollback in case there is any error
+        connection.rollback()
+        logging.error('Failed to remove IP from the database')
+
+def deleteIpRange(connection, ip1, ip2):
+    '''Remove IP from the range
+    :param connect: object connection to the database
+    :type connect: object
+    :param ip1: starting ip address
+    :type ip1: ip
+    :param ip2: end ip address
+    :type ip2: ip
+    
+    '''
+    ipv = IPAddress(ip1).version
+    sql = 'SELECT `id` FROM `ipv%s_addresses` WHERE `address`BETWEEN %s AND %s'%(ipv,ip1,ip2)
+    sqldel = 'DELETE FROM `ipv%s_addresses` WHERE `address` BETWEEN %s AND %s'%(ipv,ip1,ip2)
+    try:
+        cursor = connection.cursor()
+        #Execute the SQL command
+        cursor.execute(sql)
+        #Commit your changes in the database
+        fetch = cursor.fetchall()
+        for x in fetch:
+            if ipv == 4:
+                lists = 'DELETE FROM `source_to_addresses` WHERE `v4_id` = %s'%(x)
+                cursor.execute(lists)
+                lists1 = 'DELETE FROM `blacklist` WHERE `v4_id_blacklist` = %s'%(x)
+                cursor.execute(lists1)
+                lists2 = 'DELETE FROM `whitelist` WHERE `v4_id_whitelist` = %s'%(x)
+                cursor.execute(lists2)                
+            else:
+                lists = 'DELETE FROM `source_to_addresses` WHERE `v6_id` = %s'%(x)
+                cursor.execute(lists)
+                lists1 = 'DELETE FROM `blacklist` WHERE `v6_id_blacklist` = %s'%(x)
+                cursor.execute(lists1)
+                lists2 = 'DELETE FROM `whitelist` WHERE `v6_id_whitelist` = %s'%(x)
+                cursor.execute(lists2)
+        #Execute the SQL command
+        cursor.execute(sqldel)
+        #Commit your changes in the database
+        connection.autocommit(True)
+    except MySQLdb.Error:
+        # Rollback in case there is any error
+        connection.rollback()
+        logging.error('Failed to remove range IP from the database')
