@@ -314,8 +314,9 @@ def deleteIp(connection, ip_address):
     :type ip: ip
     '''
     #Version detection
-    ipv = IPAddress(ip_address).version
     ipid = findID(connection, ip_address)
+    ipv = get_ip_data(ip_address)[1]
+    ip_address = get_ip_data(ip_address)[0]
     sql = "DELETE FROM `ipv%s_addresses` WHERE `address` = %s"%(ipv,ip_address)
     sql1 = "DELETE FROM `blacklist` WHERE `v%s_id_blacklist` = %s"%(ipv,ipid)
     sql2 = "DELETE FROM `whitelist` WHERE `v%s_id_whitelist` = %s"%(ipv,ipid)
@@ -327,7 +328,7 @@ def deleteIp(connection, ip_address):
         cursor.execute(sql1)
         cursor.execute(sql2)
         cursor.execute(sql)
-    except MySQLdb.Error:
+    except mdb.Error:
         # Rollback in case there is any error
         connection.rollback()
         logging.error('Failed to remove IP from the database')
