@@ -343,7 +343,10 @@ def deleteIpRange(connection, ip1, ip2):
     :type ip2: ip
 
     '''
-    ipv = IPAddress(ip1).version
+    ipv = get_ip_data(ip_address)[1]
+    ip1 = get_ip_data(ip1)[0]
+    ip2 = get_ip_data(ip2)[0]
+    
     sql = 'SELECT `id` FROM `ipv%s_addresses` WHERE `address`BETWEEN %s AND %s'%(ipv,ip1,ip2)
     sqldel = 'DELETE FROM `ipv%s_addresses` WHERE `address` BETWEEN %s AND %s'%(ipv,ip1,ip2)
     try:
@@ -369,7 +372,7 @@ def deleteIpRange(connection, ip1, ip2):
                 cursor.execute(lists2)
         #Execute the SQL command
         cursor.execute(sqldel)
-    except MySQLdb.Error:
+    except mdb.Error:
         # Rollback in case there is any error
         connection.rollback()
         logging.error('Failed to remove range IP from the database')
