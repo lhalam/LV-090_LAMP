@@ -24,6 +24,17 @@ def get_ip_data(ip_address):
     ip_value = ip.value if ip_version == 4 else bin(ip)
     return ip_value, ip_version
 
+def add_sql_limit(sql, limit):
+    """Add limit clause to sql query text
+
+    :param sql: String containing sql query that should be limited
+    :param limit: A tuple of integers for offset and row count in limit clause
+
+    """
+    # strip off trialing whitespaces, remove ";" from end and add limit
+    sql_with_limit = sql.rstrip()[:-1] + ' LIMIT %s, %s;' % limit
+    return sql_with_limit
+
 
 def get_ip_with_source_name(connection, sourcename, limit=None):
     """Get all ip addresses (if limit is not set), whose source name match
@@ -50,8 +61,7 @@ def get_ip_with_source_name(connection, sourcename, limit=None):
         WHERE sources.source_name = "{1}"
     );'''
     if limit:
-        # if "limit" parameter is set, add LIMIT clause to sql query
-        sql = sql[:-1] + "LIMIT %s, %s;" % limit
+        sql = add_sql_limit(sql, limit)
     # create queries for v4 and v6 ip addresses
     sql_v4 = sql.format('v4', sourcename)
     sql_v6 = sql.format('v6', sourcename)
@@ -91,7 +101,7 @@ def get_ip_from_range(connection, start, end, limit=None):
     WHERE address BETWEEN {1} AND {2};'''
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
-        sql = sql[:-1] + " LIMIT %s, %s;" % limit
+        sql = add_sql_limit(sql, limit)
     # check if ip versions match
     start_value, start_version = get_ip_data(start)
     end_value, end_version = get_ip_data(end)
@@ -169,7 +179,7 @@ def get_ips_added_in_range(connection, startdate, enddate, limit=None):
     WHERE date_added BETWEEN '{1}' AND '{2}';"""
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
-        sql = sql[:-1] + " LIMIT %s, %s;" % limit
+        sql = add_sql_limit(sql, limit)
     # get formated date string
     cursor = connection.cursor()
     sql_v4 = sql.format(4, startdate.date(), enddate.date())
@@ -209,7 +219,7 @@ def get_sources_modified_in_range(connection, startdate, enddate, limit=None):
     BETWEEN "{0}" AND "{1}";'''.format(startdate.date(), enddate.date())
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
-        sql = sql[:-1] + " LIMIT %s, %s;" % limit
+        sql = add_sql_limit(sql, limit)
     cursor.execute(sql)
     result = cursor.fetchall()
     cursor.close()
