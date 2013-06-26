@@ -399,3 +399,4 @@ def select_ip_not_in_source (connection):
     cursor.execute(sql_v6)
     result_v6 = cursor.fetchall()
     return result_v4 + result_v6
+    #test   
