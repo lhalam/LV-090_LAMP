@@ -20,11 +20,3 @@ def create_pool(config, section, overflow, size):
         pool_size=size
     )
     return mysql_pool
-
-if __name__ == '__main__':
-    my_pool = create_pool('test_config.cfg', 'MySQL settings', 10, 5)
-    connection = my_pool.connect()
-    cursor = connection.cursor()
-    cursor.execute('select * from sources;')
-    data = cursor.fetchall()
-    connection.close()
