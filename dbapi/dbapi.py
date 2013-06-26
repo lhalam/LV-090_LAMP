@@ -376,3 +376,26 @@ def deleteIpRange(connection, ip1, ip2):
         # Rollback in case there is any error
         connection.rollback()
         logging.error('Failed to remove range IP from the database')
+
+def select_ip_not_in_source (connection):
+    """
+    select all IP without sources
+
+    :param connection: connections data
+    :type connection: class 'MySQLdb.connections.Connection'
+    :returns: tuple
+    """
+    cursor = connection.cursor()
+    sql = """
+    SELECT * FROM ip{0}_addresses 
+    WHERE id NOT IN 
+    (
+    SELECT {0}_id FROM source_to_addresses
+    );"""
+    sql_v4 = sql.format('v4')
+    sql_v6 = sql.format('v6')
+    cursor.execute(sql_v4)
+    result_v4 = cursor.fetchall()
+    cursor.execute(sql_v6)
+    result_v6 = cursor.fetchall()
+    return result_v4 + result_v6
