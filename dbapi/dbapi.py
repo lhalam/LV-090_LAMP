@@ -293,17 +293,18 @@ def delIpFromList(connection, ip_address, lists):
     '''
     ipid = findID(connection, ip_address)
     #Version detection
-    ipv = IPAddress(ip_address).version
+    ipv = get_ip_data(ip_address)[1]
     sql = "DELETE FROM %s WHERE v%s_id_%s = %s"%(lists,ipv,lists,ipid)
     cursor = connection.cursor()
     try:
         #Execute the SQL command
         cursor.execute(sql)
         cursor.close()
-    except MySQLdb.Error:
+    except mdb.Error:
         # Rollback in case there is any error
         connection.rollback()
         logging.error('Failed to remove IP from the lists')
+        
 
 def deleteIp(connection, ip_address):
     '''Removes the IP from database
