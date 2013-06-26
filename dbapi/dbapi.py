@@ -288,8 +288,7 @@ def delIpFromList(connection, ip_address, lists):
     try:
         #Execute the SQL command
         cursor.execute(sql)
-        #Commit your changes in the database
-        connection.autocommit(True)
+        cursor.close()
     except MySQLdb.Error:
         # Rollback in case there is any error
         connection.rollback()
@@ -316,8 +315,6 @@ def deleteIp(connection, ip_address):
         cursor.execute(sql1)
         cursor.execute(sql2)
         cursor.execute(sql)
-        #Commit your changes in the database
-        connection.autocommit(True)
     except MySQLdb.Error:
         # Rollback in case there is any error
         connection.rollback()
@@ -359,8 +356,6 @@ def deleteIpRange(connection, ip1, ip2):
                 cursor.execute(lists2)
         #Execute the SQL command
         cursor.execute(sqldel)
-        #Commit your changes in the database
-        connection.autocommit(True)
     except MySQLdb.Error:
         # Rollback in case there is any error
         connection.rollback()
