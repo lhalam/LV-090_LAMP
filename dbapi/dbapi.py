@@ -265,9 +265,8 @@ def findID(connection, ip_address):
         cursor.execute(sql)
         #Selects all data from a table
         ipid = cursor.fetchone()
+        cursor.close()
         return ipid[0]
-        # Commit your changes in the database
-        connection.autocommit(True)
     except MySQLdb.Error:
         logging.error('Failed to find IP id')
 
@@ -279,7 +278,7 @@ def delIpFromList(connection, ip_address, lists):
     :type ip: str
     :param lists: black or white list
     :type lists: string (blacklist or whitelist)
-    :raises: AttributeError, TypeError 
+    :raises: AttributeError, TypeError
     '''
     ipid = findID(connection, ip_address)
     #Version detection
@@ -332,7 +331,7 @@ def deleteIpRange(connection, ip1, ip2):
     :type ip1: ip
     :param ip2: end ip address
     :type ip2: ip
-    
+
     '''
     ipv = IPAddress(ip1).version
     sql = 'SELECT `id` FROM `ipv%s_addresses` WHERE `address`BETWEEN %s AND %s'%(ipv,ip1,ip2)
@@ -350,7 +349,7 @@ def deleteIpRange(connection, ip1, ip2):
                 lists1 = 'DELETE FROM `blacklist` WHERE `v4_id_blacklist` = %s'%(x)
                 cursor.execute(lists1)
                 lists2 = 'DELETE FROM `whitelist` WHERE `v4_id_whitelist` = %s'%(x)
-                cursor.execute(lists2)                
+                cursor.execute(lists2)
             else:
                 lists = 'DELETE FROM `source_to_addresses` WHERE `v6_id` = %s'%(x)
                 cursor.execute(lists)
