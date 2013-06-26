@@ -256,9 +256,9 @@ def findID(connection, ip_address):
     :param ip: ip address
     :type ip: str
     '''
-    ipv = IPAddress(ip_address).version
-    #ipv = ipv.version
-    sql = "select id from ipv%s_addresses where address = %s"%(ipv,ip_address)
+    ipv = get_ip_data(ip_address)[1]
+    ip_address = get_ip_data(ip_address)[0]
+    sql = "SELECT id FROM ipv%s_addresses WHERE address = %s"%(ipv,ip_address)
     cursor = connection.cursor()
     try:
         # Execute the SQL command
@@ -267,8 +267,9 @@ def findID(connection, ip_address):
         ipid = cursor.fetchone()
         cursor.close()
         return ipid[0]
-    except MySQLdb.Error:
+    except mdb.Error:
         logging.error('Failed to find IP id')
+
 
 def delIpFromList(connection, ip_address, lists):
     '''Removes the IP from black or white list
