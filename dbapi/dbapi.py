@@ -409,7 +409,7 @@ def get_ip_not_in_source (connection, limit=None):
         % (len(result))
     )
     return result
-def get_source_by_name (connection,sourcename):
+def get_source_by_sourcename (connection,sourcename):
     """Search source by name and return whole information
     about it from table 'sources'
 
