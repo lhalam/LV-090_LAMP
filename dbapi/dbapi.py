@@ -409,6 +409,7 @@ def get_ip_not_in_source (connection, limit=None):
         % (len(result))
     )
     return result
+
 def get_source_by_sourcename (connection,sourcename):
     """Search source by name and return whole information
     about it from table 'sources'
@@ -428,6 +429,9 @@ def get_source_by_sourcename (connection,sourcename):
         cursor.execute(sql)
         result = cursor.fetchone()
         cursor.close()
+        MODULE_LOGGER.debug(
+            'Source with sourcename "%s" exist' %sourcename
+        )
         return result
     except mdb.Error:
         logging.error('Entered sourcename not exist')
