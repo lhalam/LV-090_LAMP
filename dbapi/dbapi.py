@@ -377,13 +377,15 @@ def deleteIpRange(connection, ip1, ip2):
         connection.rollback()
         logging.error('Failed to remove range IP from the database')
 
-def select_ip_not_in_source (connection):
-    """
-    select all IP without sources
+def get_ip_not_in_source (connection, limit=None):
+    """Select all IP without sources
 
     :param connection: connections data
     :type connection: class 'MySQLdb.connections.Connection'
-    :returns: tuple
+    :param limit: A tuple of offset and row count.
+    :type: limit: tuple.
+    :returns: tuple -- tuple that contains all info from ip tables,
+    where IP without sourcename.
     """
     cursor = connection.cursor()
     sql = """
@@ -392,11 +394,40 @@ def select_ip_not_in_source (connection):
     (
     SELECT {0}_id FROM source_to_addresses
     );"""
+    if limit:
+        sql = add_sql_limit(sql, limit)
     sql_v4 = sql.format('v4')
     sql_v6 = sql.format('v6')
     cursor.execute(sql_v4)
     result_v4 = cursor.fetchall()
     cursor.execute(sql_v6)
     result_v6 = cursor.fetchall()
-    return result_v4 + result_v6
-    #test   
+    result = result_v4 + result_v6
+    cursor.close()
+    MODULE_LOGGER.debug(
+        'Searching for ips without source, found %s'
+        % (len(result))
+    )
+    return result
+def get_source_by_name (connection,sourcename):
+    """Search source by name and return whole information
+    about it from table 'sources'
+
+    :param connection: connections data.
+    :type connection: class 'MySQLdb.connections.Connection'.
+    :param sourcename: selected source.
+    :type sourcename: str.
+    :returns: tuple -- tuple contains all values from table 'sources'
+    if selected sourcename exist.
+    """
+    cursor = connection.cursor()
+    sql = """
+    SELECT * FROM sources 
+    WHERE `source_name` =  '%s' """ %sourcename
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+    except mdb.Error:
+        logging.error('Entered sourcename not exist')
