@@ -17,6 +17,7 @@ def get_ip_data(ip_address):
     is 4 and binary - if ip version is 6
 
     :param ip_address: ip address in string form.
+    :author: Andriy Kohut
 
     """
     ip = IPAddress(ip_address)
@@ -49,6 +50,7 @@ def get_ip_with_source_name(connection, sourcename, limit=None):
     :type: limit: tuple.
     :returns: tuple -- each inner tuple contains all values from ip addresses
     table that match sourcename.
+    :author: Andriy Kohut
 
     """
     cursor = connection.cursor()
@@ -93,6 +95,7 @@ def get_ip_from_range(connection, start, end, limit=None):
     :type: limit: tuple.
     :returns: tuple -- each inner tuple contains all values from ip addresses
     table within range.
+    author: Andriy Kohut
 
     """
     cursor = connection.cursor()
@@ -127,6 +130,7 @@ def find_ip_list_type(connection, ip_address):
     :param ip_address: ip-address.
     :type start: str.
     :returns: str -- list name 'whitelsit' or 'blacklist' if found, else None
+    :author: Andriy Kohut
 
     """
     cursor = connection.cursor()
@@ -153,7 +157,9 @@ def find_ip_list_type(connection, ip_address):
         return None
     cursor.close()
     list_name = 'whitelist' if whitelist_count > 0 else 'blacklist'
-    MODULE_LOGGER.debug("Get %s list type. Found: %s" % (ip_address, list_name))
+    MODULE_LOGGER.debug(
+        "Get %s list type. Found: %s" % (ip_address, list_name)
+    )
     return list_name
 
 
@@ -170,6 +176,7 @@ def get_ips_added_in_range(connection, startdate, enddate, limit=None):
     :type: limit: tuple.
     :returns: tuple -- each inner tuple contains all values from ip addresses
     table within date range
+    :author: Andriy Kohut
 
     """
     if startdate > enddate:
@@ -210,6 +217,7 @@ def get_sources_modified_in_range(connection, startdate, enddate, limit=None):
     :type: limit: tuple.
     :returns: tuple -- each inner tuple contains all values from ip addresses
     table within date range
+    :author: Andriy Kohut
 
     """
     cursor = connection.cursor()
@@ -238,6 +246,7 @@ def check_if_ip_in_database(connection, ip_address):
     :param ip_address: Ip address to check.
     :type ip_address: str.
     :returns: boolean -- True if ip in database, else False.
+    :author: Andriy Kohut
 
     """
     ip_value, ip_version = get_ip_data(ip_address)
@@ -304,7 +313,7 @@ def delIpFromList(connection, ip_address, lists):
         # Rollback in case there is any error
         connection.rollback()
         logging.error('Failed to remove IP from the lists')
-        
+
 
 def deleteIp(connection, ip_address):
     '''Removes the IP from database
@@ -346,7 +355,7 @@ def deleteIpRange(connection, ip1, ip2):
     ipv = get_ip_data(ip_address)[1]
     ip1 = get_ip_data(ip1)[0]
     ip2 = get_ip_data(ip2)[0]
-    
+
     sql = 'SELECT `id` FROM `ipv%s_addresses` WHERE `address`BETWEEN %s AND %s'%(ipv,ip1,ip2)
     sqldel = 'DELETE FROM `ipv%s_addresses` WHERE `address` BETWEEN %s AND %s'%(ipv,ip1,ip2)
     try:
@@ -389,8 +398,8 @@ def get_ip_not_in_source (connection, limit=None):
     """
     cursor = connection.cursor()
     sql = """
-    SELECT * FROM ip{0}_addresses 
-    WHERE id NOT IN 
+    SELECT * FROM ip{0}_addresses
+    WHERE id NOT IN
     (
     SELECT {0}_id FROM source_to_addresses
     );"""
@@ -423,7 +432,7 @@ def get_source_by_sourcename (connection,sourcename):
     """
     cursor = connection.cursor()
     sql = """
-    SELECT * FROM sources 
+    SELECT * FROM sources
     WHERE `source_name` =  '%s' """ %sourcename
     try:
         cursor.execute(sql)
@@ -477,7 +486,7 @@ def insert_new_source (connection,source_name,url,rank):
 
 def insert_ip_into_list (connection,ip_address,list_type):
     """
-    
+
     """
     ip_value, ip_version = get_ip_data(ip_address)
     sql = '''SELECT id FROM ipv{0}_addresses WHERE address = {1} ;'''.format(ip_version, ip_value)
