@@ -435,3 +435,63 @@ def get_source_by_sourcename (connection,sourcename):
         return result
     except mdb.Error:
         logging.error('Entered sourcename not exist')
+
+def insert_ip_into_db(connection,ip_address):
+    """Insert ip in database
+
+    :param connection: MySQL database connection.
+    :type connection: MySQLdb.connections.Connection.
+    :param ip_address: Ip address to add.
+    :type ip_address: str.
+
+    """
+    ip = IPAddress(ip_address)
+    if ip.version==4:
+        sql = '''INSERT INTO `ipv4_addresses`(`address`,`date_added`) VALUES (INET_ATON('%s'),curdate())''' % ip
+    else:
+        ip = bin(ip)
+        sql = ''' INSERT INTO `ipv6_addresses`(`address`,`date_added`) VALUES ( %s , curdate()); ''' % ip
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    cursor.close()
+
+
+def insert_new_source (connection,source_name,url,rank):
+    """Insert new source information in database
+
+    :param connection: MySQL database connection.
+    :type connection: MySQLdb.connections.Connection.
+    :param sourse_name:  Source name to add.
+    :type sourse_name: str.
+    :param url:  Url name to add.
+    :type url: str.
+    :param rank:  Rank of sourse.From 1 to 10.
+    :type rank: tinyint.
+
+    """
+    sql=''' INSERT INTO `sources` (`source_name`, `url`, `source_date_added`, `url_date_modified`, `rank`) VALUES ('%s','%s', curdate() , NULL, '%s'); ''' % (source_name,url,rank)
+    cursor=connection.cursor()
+    cursor.execute(sql)
+    cursor.close()
+
+
+def get_ip_data(ip_address):
+    """
+
+    """
+    ip = IPAddress(ip_address)
+    ip_version = ip.version
+    ip_value = ip.value if ip_version == 4 else bin(ip)
+    return ip_value, ip_version
+
+def insert_ip_into_list (connection,ip_address,list_type):
+    """
+    
+    """
+    ip_value, ip_version = get_ip_data(ip_address)
+    sql = '''SELECT id FROM ipv{0}_addresses WHERE address = {1} ;'''.format(ip_version, ip_value)
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    result = int(cursor.fetchone()[0])
+    sql = ''' INSERT INTO `{0}`(`v{1}_id_{0}`) VALUES ({2}); '''.format(list_type, ip_version, result)
+    cursor.execute(sql)
