@@ -5,7 +5,7 @@ from config_parser import get_section_settings
 class TestConfigParsing(unittest.TestCase):
 
     def setUp(self):
-        self.config_file = 'test_config.cfg'
+        self.config_file = 'dbapi.cfg'
         self.section = "MySQL settings"
 
     def test_mysql_section_parameters(self):
