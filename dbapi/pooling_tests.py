@@ -5,7 +5,7 @@ from pooling import create_pool
 class PoolingTest(unittest.TestCase):
 
     def setUp(self):
-        self.pool = create_pool('test_config.cfg', 'MySQL settings', 10, 5)
+        self.pool = create_pool('dbapi.cfg', 'MySQL settings', 10, 5)
 
     def tearDown(self):
         self.pool = self.pool.recreate()
