@@ -475,15 +475,6 @@ def insert_new_source (connection,source_name,url,rank):
     cursor.close()
 
 
-def get_ip_data(ip_address):
-    """
-
-    """
-    ip = IPAddress(ip_address)
-    ip_version = ip.version
-    ip_value = ip.value if ip_version == 4 else bin(ip)
-    return ip_value, ip_version
-
 def insert_ip_into_list (connection,ip_address,list_type):
     """
     
