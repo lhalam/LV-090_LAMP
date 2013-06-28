@@ -12,7 +12,7 @@ from mysql_connector import get_database_connection
 class TestDBAPI(unittest.TestCase):
 
     def setUp(self):
-        self.connection = get_database_connection('test_config.cfg',
+        self.connection = get_database_connection('dbapi.cfg',
                                                   'MySQL settings')
 
     def test_get_ip_data(self):
