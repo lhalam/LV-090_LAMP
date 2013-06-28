@@ -10,29 +10,29 @@ INSERT INTO ipv4_addresses (address, date_added) VALUES
 (1314273857, '2013-06-20'),
 (2268029495, '2013-06-20');
 
-INSERT INTO sources (source_name, url, source_date_added, url_date_modified, rank) VALUES
-('test1', 'www.google.com', '2013-06-20', NULL, 3),
-('test2', 'www.test.com', '2013-06-20', NULL, 5),
-('test3', 'www.bash.im', '2013-06-20', NULL, 7),
-('test4', 'www.w3s.com', '2013-06-20', NULL, 2);
+INSERT INTO sources (source_name, url, source_date_added, rank) VALUES
+('test1', 'www.google.com', '2013-06-20', 3),
+('test2', 'www.test.com', '2013-06-20', 5),
+('test3', 'www.bash.im', '2013-06-20', 7),
+('test4', 'www.w3c.com', '2013-06-20', 2);
 
-INSERT INTO source_to_addresses (source_id, v4_id, v6_id) VALUES
-(1, 1, NULL),
-(1, 2, NULL),
-(2, 3, NULL),
-(2, 4, NULL),
-(3, 5, NULL),
-(3, 6, NULL),
-(4, 7, NULL);
+INSERT INTO source_to_addresses (source_id, v4_id) VALUES
+(1, 1),
+(1, 2),
+(2, 3),
+(2, 4),
+(3, 5),
+(3, 6),
+(4, 7);
 
-INSERT INTO whitelist (v4_id_whitelist, v6_id_whitelist) VALUES
-(3, NULL),
-(4, NULL),
-(7, NULL),
-(8, NULL);
+INSERT INTO whitelist (v4_id_whitelist) VALUES
+(3),
+(4),
+(7),
+(8);
 
-INSERT INTO blacklist (v4_id_blacklist, v6_id_blacklist) VALUES
-(1, NULL),
-(2, NULL),
-(5, NULL),
-(6, NULL);
+INSERT INTO blacklist (v4_id_blacklist) VALUES
+(1),
+(2),
+(5),
+(6);
