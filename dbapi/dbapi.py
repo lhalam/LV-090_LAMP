@@ -478,24 +478,32 @@ def get_source_by_sourcename (connection,sourcename):
     except mdb.Error:
         logging.error('Entered sourcename not exist')
 
-def insert_ip_into_db(connection,ip_address):
-    """Insert ip in database
+def insert_ip_into_db(connection, ip_address):
+    """Insert ip address in database
 
     :param connection: MySQL database connection.
     :type connection: MySQLdb.connections.Connection.
     :param ip_address: Ip address to add.
     :type ip_address: str.
+    author: Andriy Glovatskiy
 
     """
-    ip = IPAddress(ip_address)
-    if ip.version==4:
-        sql = '''INSERT INTO `ipv4_addresses`(`address`,`date_added`) VALUES (INET_ATON('%s'),curdate())''' % ip
-    else:
-        ip = bin(ip)
-        sql = ''' INSERT INTO `ipv6_addresses`(`address`,`date_added`) VALUES ( %s , curdate()); ''' % ip
-    cursor = connection.cursor()
-    cursor.execute(sql)
-    cursor.close()
+    try:
+        cursor = connection.cursor()
+        ip = IPAddress(ip_address)
+        if ip.version==4:
+            sql = '''INSERT INTO `ipv4_addresses`(`address`,`date_added`) 
+            VALUES (INET_ATON('%s'),curdate())''' % ip
+            cursor.execute(sql)
+        else:
+            ip = bin(ip)
+            sql = ''' INSERT INTO `ipv6_addresses`(`address`,`date_added`) 
+            VALUES ( %s , curdate()); ''' % ip
+            cursor.execute(sql)
+        cursor.close()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
 
 
 def insert_new_source (connection,source_name,url,rank):
