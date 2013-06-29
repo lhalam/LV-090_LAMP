@@ -15,9 +15,6 @@ def get_database_connection(config, section):
 
     :param config: a path to database config file
     :returns: Returns a MYSQL connection object.
-    :raises: TODO (DataError, DatabaseError, IntegrityError, InterfaceError,
-    InternalError, MySQLError, NotSupportedError, OperationalError,
-    ProgrammingError)
 
     """
     section_data = get_section_settings(config, section)
