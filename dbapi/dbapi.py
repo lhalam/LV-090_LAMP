@@ -4,8 +4,10 @@ parameter, other parameter depend on function itself. Functions use MySQLdb
 library for executing queries and retrieving data"""
 import MySQLdb as mdb
 from netaddr import IPAddress
+from netaddr.core import AddrFormatError
 
 from logger import create_logger
+from dbapi_exceptions import IPAddressError, SQLSyntaxError
 
 MODULE_LOGGER = create_logger('dbapi', 'dbapi.cfg')
 
@@ -18,10 +20,14 @@ def get_ip_data(ip_address):
     :author: Andriy Kohut
 
     """
-    ip = IPAddress(ip_address)
+    try:
+        ip = IPAddress(ip_address)
+    except AddrFormatError:
+        raise IPAddressError
     ip_version = ip.version
     ip_value = ip.value if ip_version == 4 else bin(ip)
     return ip_value, ip_version
+
 
 def add_sql_limit(sql, limit):
     """Add limit clause to sql query text
@@ -66,13 +72,17 @@ def get_ip_with_source_name(connection, sourcename, limit=None):
     sql_v4 = sql.format('v4', sourcename)
     sql_v6 = sql.format('v6', sourcename)
     # execute and fetch all results
-    cursor.execute(sql_v4)
-    result_v4 = cursor.fetchall()
-    cursor.execute(sql_v6)
-    result_v6 = cursor.fetchall()
-    # close cursor and return all results
-    result = result_v4 + result_v6
-    cursor.close()
+    try:
+        cursor.execute(sql_v4)
+        result_v4 = cursor.fetchall()
+        cursor.execute(sql_v6)
+        result_v6 = cursor.fetchall()
+        result = result_v4 + result_v6
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     MODULE_LOGGER.debug(
         'Searching for ips with source named "%s", found %s'
         % (sourcename, len(result))
@@ -110,9 +120,14 @@ def get_ip_from_range(connection, start, end, limit=None):
         raise Exception("Different ip versions in start and end")
     # format query according to ip version, start and end values
     sql = sql.format(start_version, start_value, end_value)
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    cursor.close()
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     MODULE_LOGGER.debug(
         'Searching for ips in range %s - %s, limit is %s, found %s'
         % (start, end, limit, len(result))
@@ -144,16 +159,21 @@ def find_ip_list_type(connection, ip_address):
     # format sql for whitelist and blacklist
     sql_whitelist = sql.format('whitelist', ip_version, ip_value)
     sql_blacklist = sql.format('blacklist', ip_version, ip_value)
-    cursor.execute(sql_whitelist)
-    # get number of address occurrences
-    whitelist_count = cursor.fetchone()[0]
-    cursor.execute(sql_blacklist)
-    blacklist_count = cursor.fetchone()[0]
+    try:
+        # get number of address occurrences
+        cursor.execute(sql_whitelist)
+        whitelist_count = cursor.fetchone()[0]
+        cursor.execute(sql_blacklist)
+        blacklist_count = cursor.fetchone()[0]
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     if whitelist_count == blacklist_count:
         if whitelist_count > 0:
             raise Exception("Ip both in white and black lists, something wrong")
         return None
-    cursor.close()
     list_name = 'whitelist' if whitelist_count > 0 else 'blacklist'
     MODULE_LOGGER.debug(
         "Get %s list type. Found: %s" % (ip_address, list_name)
@@ -186,14 +206,19 @@ def get_ips_added_in_range(connection, startdate, enddate, limit=None):
         # if "limit" parameter is set, add LIMIT clause to sql query
         sql = add_sql_limit(sql, limit)
     # get formated date string
-    cursor = connection.cursor()
     sql_v4 = sql.format(4, startdate.date(), enddate.date())
-    cursor.execute(sql_v4)
-    result_v4 = cursor.fetchall()
     sql_v6 = sql.format(6, startdate.date(), enddate.date())
-    cursor.execute(sql_v6)
-    result_v6 = cursor.fetchall()
-    cursor.close()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(sql_v4)
+        result_v4 = cursor.fetchall()
+        cursor.execute(sql_v6)
+        result_v6 = cursor.fetchall()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     result = result_v4 + result_v6
     MODULE_LOGGER.debug(
         "Get ips added since %s till %s, limit is %s. Found: %s"
@@ -218,7 +243,6 @@ def get_sources_modified_in_range(connection, startdate, enddate, limit=None):
     :author: Andriy Kohut
 
     """
-    cursor = connection.cursor()
     sql = '''
     SELECT * FROM sources
     WHERE url_date_modified
@@ -226,9 +250,15 @@ def get_sources_modified_in_range(connection, startdate, enddate, limit=None):
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
         sql = add_sql_limit(sql, limit)
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    cursor.close()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     MODULE_LOGGER.debug(
         "Get sources modified since %s till %s, limit is %s. Found: %s"
         % (startdate, enddate, limit, len(result))
@@ -252,10 +282,15 @@ def check_if_ip_in_database(connection, ip_address):
     SELECT count(id) FROM ipv{0}_addresses
     WHERE address = {1};
     '''.format(ip_version, ip_value)
-    cursor = connection.cursor()
-    cursor.execute(sql)
-    result = cursor.fetchone()[0]
-    cursor.close()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchone()[0]
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     result = True if result else False
     MODULE_LOGGER.debug(
         'Check if %s is in database. Returned: %s'
