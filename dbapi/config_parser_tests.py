@@ -14,7 +14,10 @@ class TestConfigParsing(unittest.TestCase):
             self.assertIn(parameter, parameters)
 
     def test_mysql_section_parameter_values(self):
-        mysql_section_data = get_section_settings(self.config_file, self.section)
+        mysql_section_data = get_section_settings(
+            self.config_file,
+            self.section
+        )
         self.assertEquals(mysql_section_data['host'], 'localhost')
         self.assertEquals(mysql_section_data['user'], 'root')
         self.assertEquals(mysql_section_data['password'], 'root')

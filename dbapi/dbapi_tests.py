@@ -44,7 +44,12 @@ class TestDBAPI(unittest.TestCase):
         self.assertEquals(len(ips), 2)
 
     def test_get_ip_from_range_with_limit(self):
-        ips = get_ip_from_range(self.connection, '192.168.1.1', '192.168.1.15', (0, 1))
+        ips = get_ip_from_range(
+            self.connection,
+            '192.168.1.1',
+            '192.168.1.15',
+            (0, 1)
+        )
         self.assertEquals(ips[0][1], 3232235777L)
         self.assertEquals(len(ips), 1)
 
@@ -96,17 +101,23 @@ class TestDBAPI(unittest.TestCase):
 
     def test_get_sources_modified_in_range(self):
         self.assertEquals(
-            len(get_sources_modified_in_range(
-                self.connection,
-                datetime(1988, 06, 06),
-                datetime.now()
-            )),
+            len(
+                get_sources_modified_in_range(
+                    self.connection,
+                    datetime(1988, 06, 06),
+                    datetime.now()
+                )
+            ),
             0
         )
 
     def test_check_if_ip_in_database(self):
-        self.assertTrue(check_if_ip_in_database(self.connection, '192.168.1.15'))
-        self.assertFalse(check_if_ip_in_database(self.connection, '192.168.1.16'))
+        self.assertTrue(
+            check_if_ip_in_database(self.connection, '192.168.1.15')
+        )
+        self.assertFalse(
+            check_if_ip_in_database(self.connection, '192.168.1.16')
+        )
 
 if __name__ == '__main__':
     unittest.main()

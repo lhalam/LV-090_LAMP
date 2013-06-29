@@ -2,6 +2,7 @@ import sqlalchemy.pool as pool
 
 from mysql_connector import get_database_connection
 
+
 def create_pool(config, section, overflow, size):
     """Create a pool of database connections
 

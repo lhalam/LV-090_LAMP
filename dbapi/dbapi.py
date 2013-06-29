@@ -2,8 +2,6 @@
 as a function (for now), each function takes MySQLdb.Connection as a first
 parameter, other parameter depend on function itself. Functions use MySQLdb
 library for executing queries and retrieving data"""
-from datetime import datetime
-
 import MySQLdb as mdb
 from netaddr import IPAddress
 

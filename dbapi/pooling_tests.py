@@ -26,6 +26,5 @@ class PoolingTest(unittest.TestCase):
         print self.pool.status()
 
 
-
 if __name__ == '__main__':
     unittest.main()

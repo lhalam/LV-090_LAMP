@@ -2,8 +2,6 @@ import logging
 
 from config_parser import get_section_settings
 
-LOGGING_SECTION_NAME = 'Logging'
-
 
 def create_logger(name, config):
     """Create and return logger object using settings from config file.
@@ -17,7 +15,7 @@ def create_logger(name, config):
 
     """
     # get dictationary of config options for logger module
-    config_data = get_section_settings(config, LOGGING_SECTION_NAME)
+    config_data = get_section_settings(config, 'Logging')
     # Convert them to uppercase for accurate usage with __getattribute__
     console_level_name = config_data['console_level'].upper()
     file_level_name = config_data['file_level'].upper()

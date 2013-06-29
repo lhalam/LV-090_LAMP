@@ -8,6 +8,7 @@ from logger import create_logger
 
 MODULE_LOGGER = create_logger('mysql_connector', 'dbapi.cfg')
 
+
 def get_database_connection(config, section):
     """Return database connection object.
 
