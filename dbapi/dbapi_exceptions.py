@@ -1,4 +1,8 @@
-"""Module containing custom dbapi exceptions"""
+"""Module containing custom dbapi exceptions.
+Possible MySQLdb exceptions: DataError, DatabaseError, IntegrityError,
+InterfaceError, InternalError, MySQLError, NotSupportedError, OperationalError,
+ProgrammingError.
+"""
 
 
 class ConnectionError(Exception):
