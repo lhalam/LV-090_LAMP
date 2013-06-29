@@ -1,5 +1,7 @@
 import unittest
+
 from config_parser import get_section_settings
+from dbapi_exceptions import ConfigError
 
 
 class TestConfigParsing(unittest.TestCase):
@@ -33,6 +35,21 @@ class TestConfigParsing(unittest.TestCase):
         self.assertEquals(logging_data['file_level'], 'debug')
         self.assertEquals(logging_data['console_level'], 'error')
         self.assertEquals(logging_data['logfile'], 'dbapi.log')
+
+
+class TestConfigExceptions(unittest.TestCase):
+
+    def test_ecxception_for_wrong_section(self):
+        self.assertRaises(
+            ConfigError,
+            lambda: get_section_settings('test_config.cfg', 'SpamHam')
+        )
+
+    def test_ecxception_unexisting_config(self):
+        self.assertRaises(
+            ConfigError,
+            lambda: get_section_settings('spamham.cfg', 'Logging')
+        )
 
 if __name__ == '__main__':
     unittest.main()
