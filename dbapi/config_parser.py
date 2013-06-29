@@ -1,6 +1,10 @@
 """Module for parsing config files using ConfigParser from standart library,
 :functions: get_config_settings"""
 import ConfigParser
+import os
+
+from dbapi_exceptions import ConfigError
+
 
 def get_section_settings(filename, section):
     """
@@ -18,6 +22,8 @@ def get_section_settings(filename, section):
     config.read(filename)
     # Initialize empty config dictationary
     section_dict = dict()
+    if (not config.has_section(section)) or (not os.path.exists(filename)):
+        raise ConfigError
     for option in config.options(section):
         # add each option of a section as value of dictationary
         section_dict[option] = config.get(section, option)
