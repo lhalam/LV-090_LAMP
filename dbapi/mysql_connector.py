@@ -5,6 +5,7 @@ import MySQLdb as mdb
 
 from config_parser import get_section_settings
 from logger import create_logger
+from dbapi_exceptions import ConnectionError
 
 MODULE_LOGGER = create_logger('mysql_connector', 'dbapi.cfg')
 
@@ -34,6 +35,6 @@ def get_database_connection(config, section):
             % (section_data['host'], section_data['database_name'])
         )
         return connection
-    except Exception as connection_error:
+    except mdb.OperationalError as connection_error:
         MODULE_LOGGER.error(connection_error.message)
-        raise connection_error
+        raise ConnectionError
