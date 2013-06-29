@@ -492,12 +492,12 @@ def insert_ip_into_db(connection, ip_address):
         cursor = connection.cursor()
         ip = IPAddress(ip_address)
         if ip.version==4:
-            sql = '''INSERT INTO `ipv4_addresses`(`address`,`date_added`) 
-            VALUES (INET_ATON('%s'),curdate())''' % ip
+            sql = '''INSERT INTO `ipv4_addresses`(`address`, `date_added`) 
+            VALUES (INET_ATON('%s'), curdate())''' % ip
             cursor.execute(sql)
         else:
             ip = bin(ip)
-            sql = ''' INSERT INTO `ipv6_addresses`(`address`,`date_added`) 
+            sql = ''' INSERT INTO `ipv6_addresses`(`address`, `date_added`) 
             VALUES ( %s , curdate()); ''' % ip
             cursor.execute(sql)
         cursor.close()
@@ -506,8 +506,8 @@ def insert_ip_into_db(connection, ip_address):
         raise SQLSyntaxError
 
 
-def insert_new_source (connection,source_name,url,rank):
-    """Insert new source information in database
+def insert_new_source (connection, source_name, url, rank):
+    """adding new source in database
 
     :param connection: MySQL database connection.
     :type connection: MySQLdb.connections.Connection.
@@ -517,16 +517,37 @@ def insert_new_source (connection,source_name,url,rank):
     :type url: str.
     :param rank:  Rank of sourse.From 1 to 10.
     :type rank: tinyint.
+    author: Andriy Glovatskiy
 
     """
-    sql=''' INSERT INTO `sources` (`source_name`, `url`, `source_date_added`, `url_date_modified`, `rank`) VALUES ('%s','%s', curdate() , NULL, '%s'); ''' % (source_name,url,rank)
-    cursor=connection.cursor()
-    cursor.execute(sql)
-    cursor.close()
-
+    try:
+        sql = ''' INSERT INTO `sources` (`source_name`, 
+            `url`, 
+            `source_date_added`, 
+            `url_date_modified`, 
+            `rank`)
+        VALUES ('%s', 
+            '%s', 
+            curdate() , 
+            NULL, 
+            '%s'); ''' % (source_name,url,rank)
+        cursor=connection.cursor()
+        cursor.execute(sql)
+        cursor.close()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
 
 def insert_ip_into_list (connection,ip_address,list_type):
-    """
+    """Insert ip in black or white list
+
+    :param connection: MySQL database connection.
+    :type connection: MySQLdb.connections.Connection.
+    :param ip_address: Ip address to add.
+    :type ip_address: str.
+    :param list_type: name of the list
+    :type list_type
+    author: Andriy Glovatskiy
 
     """
     ip_value, ip_version = get_ip_data(ip_address)
