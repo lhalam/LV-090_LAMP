@@ -308,6 +308,8 @@ def find_ip_id(connection, ip_address):
     :type connect: object
     :param ip: ip address
     :type ip: str
+    :returns: id -- id of IP address from database
+    :author: Oleg Babiy
     """
     ip_value = get_ip_data(ip_address)[0]
     ip_version = get_ip_data(ip_address)[1]
@@ -324,6 +326,9 @@ def find_ip_id(connection, ip_address):
         MODULE_LOGGER.error(mdb_error.message)
         raise SQLSyntaxError
     finally:
+        MODULE_LOGGER.debug(
+        "IP addresses %s id %s" % (ip_address,ip_id[0])
+    )
         cursor.close()
 
 
@@ -336,6 +341,7 @@ def delIpFromList(connection, ip_address, lists):
     :param lists: black or white list
     :type lists: string (blacklist or whitelist)
     :raises: AttributeError, TypeError
+    :author: Oleg Babiy
     '''
     ipid = find_ip_id(connection, ip_address)
     #Version detection
@@ -345,19 +351,24 @@ def delIpFromList(connection, ip_address, lists):
     try:
         #Execute the SQL command
         cursor.execute(sql)
-        cursor.close()
     except mdb.Error:
         # Rollback in case there is any error
         connection.rollback()
-        logging.error('Failed to remove IP from the lists')
-
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        MODULE_LOGGER.debug(
+        "Removing %s IP%s addresses which has ID = %s from a %s" % (ip_address,ipv,ipid,lists)
+    )
+        cursor.close()
 
 def deleteIp(connection, ip_address):
     '''Removes the IP from database
     :param connect: object connection to the database
     :type connect: object
     :param ip: ip address
-    :type ip: ip
+    :type ip: str
+    :author: Oleg Babiy
     '''
     #Version detection
     ipid = find_ip_id(connection, ip_address)
@@ -377,17 +388,23 @@ def deleteIp(connection, ip_address):
     except mdb.Error:
         # Rollback in case there is any error
         connection.rollback()
-        logging.error('Failed to remove IP from the database')
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        MODULE_LOGGER.debug(
+        "Removing %s IP%s addresses which has ID = %s from a database" % (ip_address,ipv,ipid)
+    )
+        cursor.close()
 
 def deleteIpRange(connection, ip1, ip2):
     '''Remove IP from the range
     :param connect: object connection to the database
     :type connect: object
     :param ip1: starting ip address
-    :type ip1: ip
+    :type ip1: str
     :param ip2: end ip address
-    :type ip2: ip
-
+    :type ip2: str
+    :author: Oleg Babiy
     '''
     ipv = get_ip_data(ip_address)[1]
     ip1 = get_ip_data(ip1)[0]
@@ -421,7 +438,13 @@ def deleteIpRange(connection, ip1, ip2):
     except mdb.Error:
         # Rollback in case there is any error
         connection.rollback()
-        logging.error('Failed to remove range IP from the database')
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        MODULE_LOGGER.debug(
+        "Removing IP%s address from the range between %s and %s . Total number of erased IP is %s" % (ipv,ip1,ip2,len(fetch))
+    )
+        cursor.close()
 
 def get_ip_not_in_source (connection, limit=None):
     """Select all IP without sources
