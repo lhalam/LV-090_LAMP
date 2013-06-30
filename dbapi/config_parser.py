@@ -20,11 +20,6 @@ def get_section_settings(filename, section):
     """
     config = ConfigParser.ConfigParser()
     config.read(filename)
-    # Initialize empty config dictationary
-    section_dict = dict()
     if (not config.has_section(section)) or (not os.path.exists(filename)):
         raise ConfigError
-    for option in config.options(section):
-        # add each option of a section as value of dictationary
-        section_dict[option] = config.get(section, option)
-    return section_dict
+    return dict(config.items(section))
