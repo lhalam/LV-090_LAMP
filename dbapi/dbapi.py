@@ -13,8 +13,8 @@ MODULE_LOGGER = create_logger('dbapi', 'dbapi.cfg')
 
 
 def get_ip_data(ip_address):
-    """Return value of ip address and ip version (value is integer if ip version
-    is 4 and binary - if ip version is 6
+    """Return value of ip address and ip version (value is integer if ip
+    version is 4 and binary - if ip version is 6
 
     :param ip_address: ip address in string form.
     :author: Andriy Kohut
@@ -301,26 +301,30 @@ def check_if_ip_in_database(connection, ip_address):
 
 '''delete function'''
 
-def findID(connection, ip_address):
-    '''Define the IP id
+
+def find_ip_id(connection, ip_address):
+    """Find IP id
     :param connect: object connection to the database
     :type connect: object
     :param ip: ip address
     :type ip: str
-    '''
-    ipv = get_ip_data(ip_address)[1]
-    ip_address = get_ip_data(ip_address)[0]
-    sql = "SELECT id FROM ipv%s_addresses WHERE address = %s"%(ipv,ip_address)
-    cursor = connection.cursor()
+    """
+    ip_value = get_ip_data(ip_address)[0]
+    ip_version = get_ip_data(ip_address)[1]
+    sql = "SELECT id FROM ipv%s_addresses WHERE address = %s;" % (
+        ip_version,
+        ip_value
+    )
     try:
-        # Execute the SQL command
+        cursor = connection.cursor()
         cursor.execute(sql)
-        #Selects all data from a table
-        ipid = cursor.fetchone()
+        ip_id = cursor.fetchone()
+        return ip_id[0]
+    except mdb.Error as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
         cursor.close()
-        return ipid[0]
-    except mdb.Error:
-        logging.error('Failed to find IP id')
 
 
 def delIpFromList(connection, ip_address, lists):
@@ -333,7 +337,7 @@ def delIpFromList(connection, ip_address, lists):
     :type lists: string (blacklist or whitelist)
     :raises: AttributeError, TypeError
     '''
-    ipid = findID(connection, ip_address)
+    ipid = find_ip_id(connection, ip_address)
     #Version detection
     ipv = get_ip_data(ip_address)[1]
     sql = "DELETE FROM %s WHERE v%s_id_%s = %s"%(lists,ipv,lists,ipid)
@@ -356,7 +360,7 @@ def deleteIp(connection, ip_address):
     :type ip: ip
     '''
     #Version detection
-    ipid = findID(connection, ip_address)
+    ipid = find_ip_id(connection, ip_address)
     ipv = get_ip_data(ip_address)[1]
     ip_address = get_ip_data(ip_address)[0]
     sql = "DELETE FROM `ipv%s_addresses` WHERE `address` = %s"%(ipv,ip_address)
