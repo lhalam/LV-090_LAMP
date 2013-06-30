@@ -11,12 +11,12 @@ def get_section_settings(filename, section):
     Parse config file and retrieve all config data from that file as a
     dicatationary.
 
-    param: filename: Name of config file
-    param: section:
+    param: filename: Name of config file (str).
+    param: section: Section of config file (str).
     returns: Return a dicatationary with keys as configuration file sections
     and values as dicatationaries too, where key is a config parameter and
-    value is corresponding config value
-    raises:
+    value is corresponding config value.
+    raises: ConfigError
     """
     config = ConfigParser.ConfigParser()
     config.read(filename)
