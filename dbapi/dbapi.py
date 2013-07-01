@@ -544,6 +544,143 @@ def get_sourcename_list_with_ip (connection,ip_address):
     )
     return result
 
+def select_source_with_rank(connection, rank):
+    """
+    Function select all sourcenames with selected rank
+
+    :param connection: connections data.
+    :type connection: class 'MySQLdb.connections.Connection'.
+    :param rank: rank value.
+    :type rank: except integer.
+    returns: tuple.
+    :author : Andrij Myzuchka
+    """
+    cursor.connection.cursor()
+    sql = """
+    SELECT source_name
+    FROM sources
+    WHERE rank = %s""" % int(rank)
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
+    MODULE_LOGGER.debug(
+        'Selected %s surces with rank %s ' % (len(result), int(rank))
+        )
+    return result
+
+def select_ip_with_rank(connection, rank, limit=None):
+    """
+    Function select all ip_values with selected rank
+
+    :param connection: connections data.
+    :type connection: class 'MySQLdb.connections.Connection'.
+    :param rank: rank value.
+    :type rank: except integer.
+    returns: tuple with ips.
+    :author : Andrij Myzuchka
+    """
+    cursor.connection.cursor()
+    sql = """
+    SELECT address FROM ipv{0}_addresses WHERE id IN (
+    SELECT v{0}_id FROM source_to_addresses WHERE source_id IN (
+    SELECT id FROM sources WHERE rank = {1}))
+    """
+    if limit:
+        sql = add_sql_limit(sql, limit)
+    sql_v4 = sql.format('v4', int(rank))
+    sql_v4 = sql.format('v4', int(rank))
+    try:
+        cursor.execute(sql_v4)
+        result4 = cursor.fetchall()
+        cursor.execute(sql_v6)
+        result6 = cursor.fetchall()
+        result = result4 + result6
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
+    MODULE_LOGGER.debug(
+        'Selected %s ips with rank %s ' % (len(result), int(rank))
+        )
+    return result
+def select_sourcename_with_rank_in_range(connection, minrank, maxrank, limit=None):
+    """
+    Function select all sourcenames with rank in selected range
+
+    :param connection: connections data.
+    :type connection: class 'MySQLdb.connections.Connection'.
+    :param minrank: lowwest rank value.
+    :type rank: except integer.
+    :param maxrank: upper rank value.
+    :type rank: except integer.
+    :returns: tuple with sourcenames.
+    :author : Andrij Myzuchka
+    """
+    cursor.connection.cursor()
+    sql = """
+    SELECT source_name FROM sources
+    WHERE rank BETWEEN %s AND %s"""
+    % int(minrank, maxrank)
+    if limit:
+        sql = add_sql_limit(sql, limit)
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
+    MODULE_LOGGER.debug(
+        'Selected %s sourcenames with rank between %s and %s' % (len(result), int(minrank), int(maxrank))
+        )
+    return result
+
+def select_ips_with_rank_in_range(connection, minrank, maxrank, limit=None):
+    """
+    Function select all ips with rank in selected range
+
+    :param connection: connections data.
+    :type connection: class 'MySQLdb.connections.Connection'.
+    :param minrank: lowwest rank value.
+    :type rank: except integer.
+    :param maxrank: upper rank value.
+    :type rank: except integer.
+    :returns: tuple with ips.
+    :author : Andrij Myzuchka
+    """
+    cursor.connection.cursor()
+    sql = """
+    SELECT address FROM ip{0}_addresses WHERE id IN (
+    SELECT {0}_id FROM source_to_addresses WHERE source_id IN (
+    SELECT id FROM sources WHERE rank BETWEEN {1} AND {2}))
+    """
+    if limit:
+        sql = add_sql_limit(sql, limit)
+    sql_v4 = sql.format('v4', int(minrank, maxrank))
+    sql_v6 = sql.format('v6', int(minrank, maxrank))
+    try:
+        cursor.execute(sql_v4)
+        result4 = cursor.fetchall()
+        cursor.execute(sql_v6)
+        result6 = cursor.fetchall()
+        result = result4 + result6
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
+    MODULE_LOGGER.debug(
+        'Selected %s ips with rank between %s and %s' % (len(result), int(minrank), int(maxrank))
+        )
+    return result
+
 def insert_ip_into_db(connection, ip_address):
     """Insert ip address in database
 
