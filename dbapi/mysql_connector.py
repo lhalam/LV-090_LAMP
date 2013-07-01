@@ -4,10 +4,10 @@ some operations on ip addresses."""
 import MySQLdb as mdb
 
 from config_parser import get_section_settings
-from logger import create_logger
+from logging_conf import create_logger
 from dbapi_exceptions import ConnectionError
 
-MODULE_LOGGER = create_logger('mysql_connector', 'dbapi.cfg')
+MODULE_LOGGER = create_logger('logging.cfg', 'connector')
 
 
 def get_database_connection(config, section):
