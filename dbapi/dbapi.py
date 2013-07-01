@@ -36,8 +36,11 @@ def add_sql_limit(sql, limit):
     :param limit: A tuple of integers for offset and row count in limit clause
 
     """
-    # strip off trialing whitespaces, remove ";" from end and add limit
-    sql_with_limit = sql.rstrip()[:-1] + ' LIMIT %s, %s;' % limit
+    # strip off trialing whitespaces and add limit
+    sql = sql.rstrip()
+    if sql.endswith(';'):
+        sql = sql[:-1]
+    sql_with_limit = sql + ' LIMIT %s, %s;' % limit
     return sql_with_limit
 
 
@@ -65,7 +68,7 @@ def get_ip_with_source_name(connection, sourcename, limit=None):
         SELECT source_to_addresses.{0}_id FROM source_to_addresses
         JOIN sources ON source_to_addresses.source_id = sources.id
         WHERE sources.source_name = "{1}"
-    );'''
+    )'''
     if limit:
         sql = add_sql_limit(sql, limit)
     # create queries for v4 and v6 ip addresses
@@ -109,7 +112,7 @@ def get_ip_from_range(connection, start, end, limit=None):
     cursor = connection.cursor()
     sql = '''
     SELECT * FROM ipv{0}_addresses
-    WHERE address BETWEEN {1} AND {2};'''
+    WHERE address BETWEEN {1} AND {2}'''
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
         sql = add_sql_limit(sql, limit)
@@ -153,7 +156,7 @@ def find_ip_list_type(connection, ip_address):
     (
         SELECT id FROM ipv{1}_addresses
         WHERE address = {2}
-    );
+    )
     '''
     ip_value, ip_version = get_ip_data(ip_address)
     # format sql for whitelist and blacklist
@@ -201,7 +204,7 @@ def get_ips_added_in_range(connection, startdate, enddate, limit=None):
         raise Exception("End date is before start date")
     sql = """
     SELECT * FROM ipv{0}_addresses
-    WHERE date_added BETWEEN '{1}' AND '{2}';"""
+    WHERE date_added BETWEEN '{1}' AND '{2}'"""
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
         sql = add_sql_limit(sql, limit)
@@ -246,7 +249,7 @@ def get_sources_modified_in_range(connection, startdate, enddate, limit=None):
     sql = '''
     SELECT * FROM sources
     WHERE url_date_modified
-    BETWEEN "{0}" AND "{1}";'''.format(startdate.date(), enddate.date())
+    BETWEEN "{0}" AND "{1}"'''.format(startdate.date(), enddate.date())
     if limit:
         # if "limit" parameter is set, add LIMIT clause to sql query
         sql = add_sql_limit(sql, limit)
@@ -280,7 +283,7 @@ def check_if_ip_in_database(connection, ip_address):
     ip_value, ip_version = get_ip_data(ip_address)
     sql = '''
     SELECT count(id) FROM ipv{0}_addresses
-    WHERE address = {1};
+    WHERE address = {1}
     '''.format(ip_version, ip_value)
     try:
         cursor = connection.cursor()
