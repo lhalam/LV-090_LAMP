@@ -691,6 +691,7 @@ def select_ips_with_rank_in_range(connection, minrank, maxrank, limit=None):
     )
     return result
 
+
 def insert_ip_into_db(connection, ip_address):
     """Insert ip address in database
 
@@ -704,13 +705,13 @@ def insert_ip_into_db(connection, ip_address):
     try:
         cursor = connection.cursor()
         ip = IPAddress(ip_address)
-        if ip.version==4:
-            sql = '''INSERT INTO `ipv4_addresses`(`address`, `date_added`) 
+        if ip.version == 4:
+            sql = '''INSERT INTO `ipv4_addresses`(`address`, `date_added`)
             VALUES (INET_ATON('%s'), curdate())''' % ip
             cursor.execute(sql)
         else:
             ip = bin(ip)
-            sql = ''' INSERT INTO `ipv6_addresses`(`address`, `date_added`) 
+            sql = ''' INSERT INTO `ipv6_addresses`(`address`, `date_added`)
             VALUES ( %s , curdate()); ''' % ip
             cursor.execute(sql)
     except mdb.ProgrammingError as mdb_error:
@@ -719,9 +720,10 @@ def insert_ip_into_db(connection, ip_address):
     finally:
         cursor.close()
     MODULE_LOGGER.debug(
-        "IP address - %s inserted seccessfuly" % ip_address )
+        "IP address - %s inserted seccessfuly" % ip_address)
 
-def insert_new_source (connection, source_name, url, rank):
+
+def insert_new_source(connection, source_name, url, rank):
     """Adding new source in database
 
     :param connection: MySQL database connection.
@@ -736,17 +738,17 @@ def insert_new_source (connection, source_name, url, rank):
 
     """
     try:
-        sql = ''' INSERT INTO `sources` (`source_name`, 
-            `url`, 
-            `source_date_added`, 
-            `url_date_modified`, 
+        sql = ''' INSERT INTO `sources` (`source_name`,
+            `url`,
+            `source_date_added`,
+            `url_date_modified`,
             `rank`)
-        VALUES ('%s', 
-            '%s', 
-            curdate() , 
-            NULL, 
-            '%s'); ''' % (source_name,url,rank)
-        cursor=connection.cursor()
+        VALUES ('%s',
+            '%s',
+            curdate(),
+            NULL,
+            '%s'); ''' % (source_name, url, rank)
+        cursor = connection.cursor()
         cursor.execute(sql)
     except mdb.ProgrammingError as mdb_error:
         MODULE_LOGGER.error(mdb_error.message)
@@ -756,7 +758,8 @@ def insert_new_source (connection, source_name, url, rank):
     MODULE_LOGGER.debug(
         "Sourse %s with rank %s inserted seccessfuly" % (source_name, rank))
 
-def insert_ip_into_list (connection, ip_address, list_type):
+
+def insert_ip_into_list(connection, ip_address, list_type):
     """Insert ip in black or white list
 
     :param connection: MySQL database connection.
@@ -771,12 +774,12 @@ def insert_ip_into_list (connection, ip_address, list_type):
     try:
         #calling anouther function to get ip address id and type
         ip_value, ip_version = get_ip_data(ip_address)
-        sql = '''SELECT id FROM ipv{0}_addresses 
+        sql = '''SELECT id FROM ipv{0}_addresses
         WHERE address = {1} ;'''.format(ip_version, ip_value)
         cursor = connection.cursor()
         cursor.execute(sql)
         result = int(cursor.fetchone()[0])
-        sql = ''' INSERT INTO `{0}`(`v{1}_id_{0}`) 
+        sql = ''' INSERT INTO `{0}`(`v{1}_id_{0}`)
         VALUES ({2}); '''.format(list_type, ip_version, result)
         cursor.execute(sql)
     except mdb.ProgrammingError as mdb_error:
@@ -786,3 +789,4 @@ def insert_ip_into_list (connection, ip_address, list_type):
         cursor.close()
     MODULE_LOGGER.debug(
         "IP address - %s inserted in - %s" % (ip_address, list_type))
+    
