@@ -6,10 +6,10 @@ import MySQLdb as mdb
 from netaddr import IPAddress
 from netaddr.core import AddrFormatError
 
-from logger import create_logger
+from logging_conf import create_logger
 from dbapi_exceptions import IPAddressError, SQLSyntaxError
 
-MODULE_LOGGER = create_logger('dbapi', 'dbapi.cfg')
+MODULE_LOGGER = create_logger('logging.cfg', 'dbapi')
 
 
 def get_ip_data(ip_address):
