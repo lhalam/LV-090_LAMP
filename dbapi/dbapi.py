@@ -625,8 +625,7 @@ def select_sourcename_with_rank_in_range(connection, minrank, maxrank, limit=Non
     cursor.connection.cursor()
     sql = """
     SELECT source_name FROM sources
-    WHERE rank BETWEEN %s AND %s"""
-    % int(minrank, maxrank)
+    WHERE rank BETWEEN %s AND %s""" % (minrank, maxrank)
     if limit:
         sql = add_sql_limit(sql, limit)
     try:
