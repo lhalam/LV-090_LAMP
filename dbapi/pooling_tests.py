@@ -13,17 +13,13 @@ class PoolingTest(unittest.TestCase):
     def test_empty_pool(self):
         self.assertEquals(self.pool.overflow(), -5)
 
-    def test_creating_connecton(self):
-        self.pool.connect()
-        self.assertEquals(self.pool.overflow(), -4)
-        self.assertEquals(self.pool.checkedin(), 1)
-
     def test_creating_and_closing_connection(self):
         connection = self.pool.connect()
-        connection.begin()
         self.assertEquals(self.pool.overflow(), -4)
+        self.assertEquals(self.pool.checkedout(), 1)
+        connection.close()
         self.assertEquals(self.pool.checkedin(), 1)
-        print self.pool.status()
+        self.assertEquals(self.pool.checkedout(), 0)
 
 
 if __name__ == '__main__':
