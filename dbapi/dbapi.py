@@ -455,6 +455,7 @@ def get_ip_not_in_source (connection, limit=None):
     :type: limit: tuple.
     :returns: tuple -- tuple that contains all info from ip tables,
     where IP without sourcename.
+    :author: Andriy Muzychka
     """
     cursor = connection.cursor()
     sql = """
@@ -467,16 +468,20 @@ def get_ip_not_in_source (connection, limit=None):
         sql = add_sql_limit(sql, limit)
     sql_v4 = sql.format('v4')
     sql_v6 = sql.format('v6')
-    cursor.execute(sql_v4)
-    result_v4 = cursor.fetchall()
-    cursor.execute(sql_v6)
-    result_v6 = cursor.fetchall()
-    result = result_v4 + result_v6
-    cursor.close()
+    try:
+        cursor.execute(sql_v4)
+        result_v4 = cursor.fetchall()
+        cursor.execute(sql_v6)
+        result_v6 = cursor.fetchall()
+        result = result_v4 + result_v6
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
     MODULE_LOGGER.debug(
-        'Searching for ips without source, found %s'
-        % (len(result))
-    )
+        'Ips without sourcenames, found %s IP' % len(result)
+        )
     return result
 
 def get_source_by_sourcename (connection,sourcename):
@@ -489,6 +494,7 @@ def get_source_by_sourcename (connection,sourcename):
     :type sourcename: str.
     :returns: tuple -- tuple contains all values from table 'sources'
     if selected sourcename exist.
+    :author: Andriy Muzychka
     """
     cursor = connection.cursor()
     sql = """
@@ -497,13 +503,46 @@ def get_source_by_sourcename (connection,sourcename):
     try:
         cursor.execute(sql)
         result = cursor.fetchone()
-        cursor.close()
-        MODULE_LOGGER.debug(
-            'Source with sourcename "%s" exist' %sourcename
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor,close()
+    MODULE_LOGGER.debug(
+        'Detail information about source with sourcename "%s"\
+         is valid' %sourcename
         )
-        return result
-    except mdb.Error:
-        logging.error('Entered sourcename not exist')
+    return result
+ 
+def get_sourcename_list_with_ip (connection,ip_address):
+    """This function return all sourcenames with inserted IP
+    :param connection: connections data
+    :type connection: class 'MySQLdb.connections.Connection'
+    :param ip: IP address (int or boolen)
+    :author: Andriy Muzychka
+    :raises: 
+    """
+    cursor = connection.cursor()
+    value, version = get_ip_data(ip_address)
+    sql = """
+    SELECT `source_name` FROM sources
+    WHERE id IN (SELECT source_id FROM source_to_addresses
+    WHERE v%s_id IN (SELECT id FROM ipv%s_addresses
+    WHERE address = '%s' ))
+    """ % (version, version, value)
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    except mdb.ProgrammingError as mdb_error:
+        MODULE_LOGGER.error(mdb_error.message)
+        raise SQLSyntaxError
+    finally:
+        cursor.close()
+    MODULE_LOGGER.debug(
+        "IP %s is refered to %s source(s)" 
+        % (ip_address, len(result))
+    )
+    return result
 
 def insert_ip_into_db(connection, ip_address):
     """Insert ip address in database
