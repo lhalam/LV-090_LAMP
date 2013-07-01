@@ -446,7 +446,8 @@ def deleteIpRange(connection, ip1, ip2):
     )
         cursor.close()
 
-def get_ip_not_in_source (connection, limit=None):
+
+def get_ip_not_in_source(connection, limit=None):
     """Select all IP without sources
 
     :param connection: connections data
@@ -481,10 +482,11 @@ def get_ip_not_in_source (connection, limit=None):
         cursor.close()
     MODULE_LOGGER.debug(
         'Ips without sourcenames, found %s IP' % len(result)
-        )
+    )
     return result
 
-def get_source_by_sourcename (connection,sourcename):
+
+def get_source_by_sourcename(connection, sourcename):
     """Search source by name and return whole information
     about it from table 'sources'
 
@@ -498,8 +500,8 @@ def get_source_by_sourcename (connection,sourcename):
     """
     cursor = connection.cursor()
     sql = """
-    SELECT * FROM sources
-    WHERE `source_name` =  '%s' """ %sourcename
+    SELECT * FROM sources WHERE `source_name` =  '%s'
+    """ % sourcename
     try:
         cursor.execute(sql)
         result = cursor.fetchone()
@@ -507,20 +509,20 @@ def get_source_by_sourcename (connection,sourcename):
         MODULE_LOGGER.error(mdb_error.message)
         raise SQLSyntaxError
     finally:
-        cursor,close()
+        cursor.close()
     MODULE_LOGGER.debug(
         'Detail information about source with sourcename "%s"\
-         is valid' %sourcename
-        )
+         is valid' % sourcename
+    )
     return result
  
-def get_sourcename_list_with_ip (connection,ip_address):
+
+def get_sourcename_list_with_ip(connection, ip_address):
     """This function return all sourcenames with inserted IP
     :param connection: connections data
     :type connection: class 'MySQLdb.connections.Connection'
     :param ip: IP address (int or boolen)
-    :author: Andriy Muzychka
-    :raises: 
+    :author: Andriy Muzychka.
     """
     cursor = connection.cursor()
     value, version = get_ip_data(ip_address)
@@ -539,10 +541,10 @@ def get_sourcename_list_with_ip (connection,ip_address):
     finally:
         cursor.close()
     MODULE_LOGGER.debug(
-        "IP %s is refered to %s source(s)" 
-        % (ip_address, len(result))
+        "IP %s is refered to %s source(s)" % (ip_address, len(result))
     )
     return result
+
 
 def select_source_with_rank(connection, rank):
     """
@@ -555,7 +557,7 @@ def select_source_with_rank(connection, rank):
     returns: tuple.
     :author : Andrij Myzuchka
     """
-    cursor.connection.cursor()
+    cursor = connection.cursor()
     sql = """
     SELECT source_name
     FROM sources
@@ -569,9 +571,9 @@ def select_source_with_rank(connection, rank):
     finally:
         cursor.close()
     MODULE_LOGGER.debug(
-        'Selected %s surces with rank %s ' % (len(result), int(rank))
-        )
+        'Selected %s surces with rank %s ' % (len(result), int(rank)))
     return result
+
 
 def select_ip_with_rank(connection, rank, limit=None):
     """
@@ -584,7 +586,7 @@ def select_ip_with_rank(connection, rank, limit=None):
     returns: tuple with ips.
     :author : Andrij Myzuchka
     """
-    cursor.connection.cursor()
+    cursor = connection.cursor()
     sql = """
     SELECT address FROM ipv{0}_addresses WHERE id IN (
     SELECT v{0}_id FROM source_to_addresses WHERE source_id IN (
@@ -593,7 +595,7 @@ def select_ip_with_rank(connection, rank, limit=None):
     if limit:
         sql = add_sql_limit(sql, limit)
     sql_v4 = sql.format('v4', int(rank))
-    sql_v4 = sql.format('v4', int(rank))
+    sql_v6 = sql.format('v4', int(rank))
     try:
         cursor.execute(sql_v4)
         result4 = cursor.fetchall()
@@ -607,9 +609,12 @@ def select_ip_with_rank(connection, rank, limit=None):
         cursor.close()
     MODULE_LOGGER.debug(
         'Selected %s ips with rank %s ' % (len(result), int(rank))
-        )
+    )
     return result
-def select_sourcename_with_rank_in_range(connection, minrank, maxrank, limit=None):
+
+
+def select_sourcename_with_rank_in_range(
+        connection, minrank, maxrank, limit=None):
     """
     Function select all sourcenames with rank in selected range
 
@@ -622,7 +627,7 @@ def select_sourcename_with_rank_in_range(connection, minrank, maxrank, limit=Non
     :returns: tuple with sourcenames.
     :author : Andrij Myzuchka
     """
-    cursor.connection.cursor()
+    cursor = connection.cursor()
     sql = """
     SELECT source_name FROM sources
     WHERE rank BETWEEN %s AND %s""" % (minrank, maxrank)
@@ -637,9 +642,11 @@ def select_sourcename_with_rank_in_range(connection, minrank, maxrank, limit=Non
     finally:
         cursor.close()
     MODULE_LOGGER.debug(
-        'Selected %s sourcenames with rank between %s and %s' % (len(result), int(minrank), int(maxrank))
-        )
+        "Selected %s sourcenames with rank between %s \
+        and %s" % (len(result), int(minrank), int(maxrank))
+    )
     return result
+
 
 def select_ips_with_rank_in_range(connection, minrank, maxrank, limit=None):
     """
@@ -654,7 +661,7 @@ def select_ips_with_rank_in_range(connection, minrank, maxrank, limit=None):
     :returns: tuple with ips.
     :author : Andrij Myzuchka
     """
-    cursor.connection.cursor()
+    cursor = connection.cursor()
     sql = """
     SELECT address FROM ip{0}_addresses WHERE id IN (
     SELECT {0}_id FROM source_to_addresses WHERE source_id IN (
@@ -676,8 +683,9 @@ def select_ips_with_rank_in_range(connection, minrank, maxrank, limit=None):
     finally:
         cursor.close()
     MODULE_LOGGER.debug(
-        'Selected %s ips with rank between %s and %s' % (len(result), int(minrank), int(maxrank))
-        )
+        'Selected %s ips with rank between %s \
+        and %s' % (len(result), int(minrank), int(maxrank))
+    )
     return result
 
 def insert_ip_into_db(connection, ip_address):
