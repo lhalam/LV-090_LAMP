@@ -329,13 +329,12 @@ def find_ip_id(connection, ip_address):
         MODULE_LOGGER.error(mdb_error.message)
         raise SQLSyntaxError
     finally:
-        MODULE_LOGGER.debug(
-        "IP addresses %s id %s" % (ip_address,ip_id[0])
-    )
+        MODULE_LOGGER.debug("IP addresses %s id %s" /
+                            % (ip_address, ip_id[0]))
         cursor.close()
 
 
-def delIpFromList(connection, ip_address, lists):
+def del_ip_from_list(connection, ip_address, lists):
     '''Removes the IP from black or white list
     :param connect: object connection to the database
     :type connect: object
@@ -360,12 +359,12 @@ def delIpFromList(connection, ip_address, lists):
         MODULE_LOGGER.error(mdb_error.message)
         raise SQLSyntaxError
     finally:
-        MODULE_LOGGER.debug(
-        "Removing %s IP%s addresses which has ID = %s from a %s" % (ip_address,ipv,ipid,lists)
-    )
+        MODULE_LOGGER.debug("Removing %s IP%s addresses which has ID = %s from a %s" /
+                            % (ip_address, ipv, ipid, lists))
         cursor.close()
 
-def deleteIp(connection, ip_address):
+
+def delete_ip(connection, ip_address):
     '''Removes the IP from database
     :param connect: object connection to the database
     :type connect: object
@@ -377,10 +376,10 @@ def deleteIp(connection, ip_address):
     ipid = find_ip_id(connection, ip_address)
     ipv = get_ip_data(ip_address)[1]
     ip_address = get_ip_data(ip_address)[0]
-    sql = "DELETE FROM `ipv%s_addresses` WHERE `address` = %s"%(ipv,ip_address)
-    sql1 = "DELETE FROM `blacklist` WHERE `v%s_id_blacklist` = %s"%(ipv,ipid)
-    sql2 = "DELETE FROM `whitelist` WHERE `v%s_id_whitelist` = %s"%(ipv,ipid)
-    sql3 = "DELETE FROM `source_to_addresses` WHERE `v%s_id` = %s"%(ipv,ipid)
+    sql = "DELETE FROM `ipv%s_addresses` WHERE `address` = %s" % (ipv, ip_address)
+    sql1 = "DELETE FROM `blacklist` WHERE `v%s_id_blacklist` = %s" % (ipv, ipid)
+    sql2 = "DELETE FROM `whitelist` WHERE `v%s_id_whitelist` = %s" % (ipv, ipid)
+    sql3 = "DELETE FROM `source_to_addresses` WHERE `v%s_id` = %s" % (ipv, ipid)
     try:
         #Execute the SQL command
         cursor = connection.cursor()
@@ -394,12 +393,12 @@ def deleteIp(connection, ip_address):
         MODULE_LOGGER.error(mdb_error.message)
         raise SQLSyntaxError
     finally:
-        MODULE_LOGGER.debug(
-        "Removing %s IP%s addresses which has ID = %s from a database" % (ip_address,ipv,ipid)
-    )
+        MODULE_LOGGER.debug("Removing %s IP%s addresses which has ID = %s from a database" /
+                            % (ip_address, ipv, ipid))
         cursor.close()
 
-def deleteIpRange(connection, ip1, ip2):
+
+def delete_ip_range(connection, ip1, ip2):
     '''Remove IP from the range
     :param connect: object connection to the database
     :type connect: object
@@ -413,8 +412,8 @@ def deleteIpRange(connection, ip1, ip2):
     ip1 = get_ip_data(ip1)[0]
     ip2 = get_ip_data(ip2)[0]
 
-    sql = 'SELECT `id` FROM `ipv%s_addresses` WHERE `address`BETWEEN %s AND %s'%(ipv,ip1,ip2)
-    sqldel = 'DELETE FROM `ipv%s_addresses` WHERE `address` BETWEEN %s AND %s'%(ipv,ip1,ip2)
+    sql = 'SELECT `id` FROM `ipv%s_addresses` WHERE `address`BETWEEN %s AND %s' % (ipv, ip1, ip2)
+    sqldel = 'DELETE FROM `ipv%s_addresses` WHERE `address` BETWEEN %s AND %s' % (ipv, ip1, ip2)
     try:
         cursor = connection.cursor()
         #Execute the SQL command
@@ -444,9 +443,9 @@ def deleteIpRange(connection, ip1, ip2):
         MODULE_LOGGER.error(mdb_error.message)
         raise SQLSyntaxError
     finally:
-        MODULE_LOGGER.debug(
-        "Removing IP%s address from the range between %s and %s . Total number of erased IP is %s" % (ipv,ip1,ip2,len(fetch))
-    )
+        MODULE_LOGGER.debug("Removing IP%s address from the range between %s and %s." /
+                            + "Total number of erased IP is %s" /
+                            % (ipv, ip1, ip2, len(fetch)))
         cursor.close()
 
 
