@@ -1,5 +1,5 @@
 """This module simply create loggers from config file. To configure new
-look for examples in 'logging.cfg' file"""
+logger look for examples in 'logging.cfg' file"""
 import logging.config
 import os
 from ConfigParser import NoSectionError, NoOptionError
